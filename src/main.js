@@ -306,7 +306,7 @@ function create() {
     });
     approvalTextSprite.setScrollFactor(0);
     approvalTextSprite.setDepth(3);
-    approvalTextSprite.setText('Approval: 100');
+    approvalTextSprite.setText('Approval: 100%');
     budgetTextSprite = this.add.text(1500, 95, '', {
         fontSize: '24px',
         color: '#000000',
@@ -314,7 +314,7 @@ function create() {
     });
     budgetTextSprite.setScrollFactor(0);
     budgetTextSprite.setDepth(3);
-    budgetTextSprite.setText('Budget: 100');
+    budgetTextSprite.setText('Budget: $100');
 
     this.input.keyboard.on('keydown-ONE', () => {
         handleKeyPress(this, 1);
@@ -652,8 +652,8 @@ function startVote(scene) {
 function updateScoreboard(approvalDelta, budgetDelta) {
     approval += approvalDelta;
     budget += budgetDelta;
-    approvalTextSprite.setText(`Approval: ${approval}`);
-    budgetTextSprite.setText(`Budget: ${budget}`);
+    approvalTextSprite.setText(`Approval: ${approval}%`);
+    budgetTextSprite.setText(`Budget: $${budget}`);
 }
 
 function win(scene, message) {
