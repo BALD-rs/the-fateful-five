@@ -192,7 +192,7 @@ const config = {
 };
 
 const SHUFFLE_POLICIES = true;
-const SKIP_INTRO = true;
+const SKIP_INTRO = false;
 const defaultPolicy = {
     "text": "Kill everyone",
     "revolt_delta": -100,
@@ -453,11 +453,6 @@ function create() {
 }
 
 function update() {
-    // if (this.state.playing) {
-    //     if (this.state.phase === 'selection' && scrolls.length === 3 && !scrolls[0] && !scroll[1] && !scroll[2]) {
-    //         generatePolicies(this);
-    //     }
-    // }
 }
 
 function generatePolicies(scene) {
@@ -472,122 +467,122 @@ function generatePolicies(scene) {
     scrolls[1] = scene.add.image(config.width / 2, .65 * config.height, 'scroll').setScale(1);
     scrolls[2] = scene.add.image(1.25 * config.width / 2, .65 * config.height, 'scroll').setScale(1);
     (async () => {
-        await sendBytes([80,80,80,80,80])
+        await sendBytes([80, 80, 80, 80, 80])
         console.log("policy PRIMED. PREPARE FOR oj.");
     })();
 }
 
-        const connectButton = document.getElementById('connectButton');
-        let port = null;
-        let reader = null;
-        let writer = null;
+const connectButton = document.getElementById('connectButton');
+let port = null;
+let reader = null;
+let writer = null;
 
-        let textDecoder = new TextDecoder();
+let textDecoder = new TextDecoder();
 
-        connectButton.addEventListener("click", async () => {
-            try {
-                port = await navigator.serial.requestPort();
-                await port.open({ baudRate: 9600 });
+connectButton.addEventListener("click", async () => {
+    try {
+        port = await navigator.serial.requestPort();
+        await port.open({ baudRate: 9600 });
 
-                writer = port.writable.getWriter();
+        writer = port.writable.getWriter();
 
-                reader = port.readable.getReader();
+        reader = port.readable.getReader();
 
-                (async () => {
-                    await sendBytes([83,83,83,83,83])
-                    console.log("SELECTION PRIMED. PREPARE FOR IMPACT.");
-                })();
+        (async () => {
+            await sendBytes([83, 83, 83, 83, 83])
+            console.log("SELECTION PRIMED. PREPARE FOR IMPACT.");
+        })();
 
-                console.log("Serial port opened and reader created.");
+        console.log("Serial port opened and reader created.");
 
-                readData();
-            } catch (err) {
-                console.error("Failed to open serial port:", err);
+        readData();
+    } catch (err) {
+        console.error("Failed to open serial port:", err);
+    }
+});
+
+async function readData() {
+    try {
+        while (true) {
+            const { value, done } = await reader.read();
+            if (done) {
+                console.log("Reader has finished.");
+                break;
             }
-        });
 
-        async function readData() {
-            try {
-                while (true) {
-                    const { value, done } = await reader.read();
-                    if (done) {
-                        console.log("Reader has finished.");
-                        break;
-                    }
+            // Decode the received bytes into a string
+            const receivedText = textDecoder.decode(value);
+            console.log("Received data:", receivedText);
 
-                    // Decode the received bytes into a string
-                    const receivedText = textDecoder.decode(value);
-                    console.log("Received data:", receivedText);
-
-                    if (receivedText.trim() === "1") {
-                        simulateKeypress(49);
-                    }
-                    if (receivedText.trim() === "2") {
-                        simulateKeypress(50);
-                    }
-                    if (receivedText.trim() === "3") {
-                        simulateKeypress(51);
-                    }
-                    if (receivedText.trim() === "4") {
-                        simulateKeypress(52);
-                    }
-                }
-            } catch (err) {
-                console.error("Error reading from serial port:", err);
+            if (receivedText.trim() === "1") {
+                simulateKeypress(49);
+            }
+            if (receivedText.trim() === "2") {
+                simulateKeypress(50);
+            }
+            if (receivedText.trim() === "3") {
+                simulateKeypress(51);
+            }
+            if (receivedText.trim() === "4") {
+                simulateKeypress(52);
             }
         }
+    } catch (err) {
+        console.error("Error reading from serial port:", err);
+    }
+}
 
-        function simulateKeypress(keycode) {
-            const event = new KeyboardEvent('keydown', {
-                key: '1',         
-                code: 'Digit1',   
-                keyCode: keycode,     
-                which: 49,    
-                bubbles: true   
-            });
-            
-            document.dispatchEvent(event);
+function simulateKeypress(keycode) {
+    const event = new KeyboardEvent('keydown', {
+        key: '1',
+        code: 'Digit1',
+        keyCode: keycode,
+        which: 49,
+        bubbles: true
+    });
+
+    document.dispatchEvent(event);
+}
+
+async function sendBytes(byteArray) {
+    if (!port || !port.writable) {
+        console.error("Serial port is not open.");
+        return;
+    }
+
+    try {
+        const buffer = new Uint8Array(byteArray);
+
+        await writer.write(buffer);
+        console.log("Sent bytes:", byteArray);
+    } catch (err) {
+        console.error("Error sending bytes:", err);
+    }
+}
+
+async function prime(array) {
+    var data = [86];
+    for (val of array) {
+        if (val === true) {
+            data.push(89);
+        } else {
+            data.push(78);
         }
+    }
+    await sendBytes(data);
+}
 
-        async function sendBytes(byteArray) {
-            if (!port || !port.writable) {
-                console.error("Serial port is not open.");
-                return;
-            }   
-
-            try {
-                const buffer = new Uint8Array(byteArray);
-                
-                await writer.write(buffer);
-                console.log("Sent bytes:", byteArray);
-            } catch (err) {
-                console.error("Error sending bytes:", err);
-            }
-        }
-
-        async function prime(array) {
-            var data =  [86];
-            for (val of array) {
-                if (val === true) {
-                    data.push(89);
-                } else {
-                    data.push(78);
-                }
-            }
-            await sendBytes(data);
-        }
-
-        // Manual Prime Button
-        document.getElementById('sendButton').addEventListener("click", async () => {
-            await prime([true, true,true, true]);
-        });
+// Manual Prime Button
+document.getElementById('sendButton').addEventListener("click", async () => {
+    await prime([true, true, true, true]);
+});
 
 function introduceCharacters(scene, dialogue) {
     if (dialogue.length == 0) {
         setTimeout(() => {
             scene.state.playing = true;
             generatePolicies(scene);
-            updateChancellor(scene, 3);
+            updateChancellor(scene, 0);
         }, 1000);
         return;
     }
@@ -665,7 +660,7 @@ function handleKeyPress(scene, key) {
                 return;
             }
             // selecting between policies
-            if ([1,2,3].includes(selectedPolicy) && key === 4) {
+            if ([1, 2, 3].includes(selectedPolicy) && key === 4) {
                 // submit the selected policy
                 hideTextbox(scene);
                 removePolicy(scene, selectedPolicy);
@@ -732,8 +727,8 @@ function handleKeyPress(scene, key) {
 }
 
 function removePolicy(scene, selectedPolicy) {
-    console.log(`rejecting policy ${selectedPolicy-1}`);
-    scrolls[selectedPolicy-1].destroy();
+    console.log(`rejecting policy ${selectedPolicy - 1}`);
+    scrolls[selectedPolicy - 1].destroy();
     scrolls.splice(selectedPolicy - 1, 1);
     scene.state.currentPolicies.splice(selectedPolicy - 1, 1);
     setTimeout(() => {
@@ -853,7 +848,7 @@ function startVote(scene) {
     })();
     let text = '';
     for (const i of remaining) {
-        text += `Press ${i+1} to eliminate ${characterTitles[i]}\n`;
+        text += `Press ${i + 1} to eliminate ${characterTitles[i]}\n`;
     }
     showTextbox(scene, 'VOTE TO ELIMINATE', text);
     scene.state.phase = 'voting';
