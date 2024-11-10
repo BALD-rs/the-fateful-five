@@ -112,6 +112,10 @@ let policyIdx = 0;
 let selectedPolicy = null;
 
 const game = new Phaser.Game(config);
+let approval = 100;
+let budget = 100;
+let approvalTextSprite = null;
+let budgetTextSprite = null;
 const evil = Math.floor(Math.random() * 4);
 let textboxSprite = null;
 let textboxTitle = null;
@@ -121,8 +125,6 @@ const scrolls = [null, null, null];
 const sounds = {};
 const sprites = {};
 const eliminated = [];
-
-let cp;
 
 const characters = [
     'dog',
@@ -158,7 +160,7 @@ const chancellorPositions = [
     [260, config.height / 6],
     [780, config.height / 9],
     [1220, config.height / 8],
-    [config.width - 350, config.height / 5],
+    [config.width - 350, config.height / 4],
 ]
 
 function preload() {
@@ -169,7 +171,6 @@ function preload() {
         currentPolicies: [],
         currentChancellor: null,
     }
-    cp = this.state.currentPolicies;
     console.log(`EVIL CHARACTER IS: ${characterTitles[evil]}`);
     console.log('SELECTION PHASE');
 
@@ -296,6 +297,24 @@ function create() {
     sprites.casa = this.add.sprite(config.width / 2, config.height / 2, 'casaSprite').play('casa');
     sprites.aj = this.add.sprite(config.width / 2, config.height / 2, 'ajSprite').play('aj');
     chancellorSprite = this.add.image(3000, 3000, 'chancellor').setScale(1.7);
+    const infoboxSprite = this.add.sprite(1596, 80, 'textbox').setScale(1.3);
+    infoboxSprite.displayWidth = .7 * infoboxSprite.width;
+    approvalTextSprite = this.add.text(1500, 45, '', {
+        fontSize: '24px',
+        color: '#000000',
+        wordWrap: { width: 300 }
+    });
+    approvalTextSprite.setScrollFactor(0);
+    approvalTextSprite.setDepth(3);
+    approvalTextSprite.setText('Approval: 100');
+    budgetTextSprite = this.add.text(1500, 95, '', {
+        fontSize: '24px',
+        color: '#000000',
+        wordWrap: { width: 300 }
+    });
+    budgetTextSprite.setScrollFactor(0);
+    budgetTextSprite.setDepth(3);
+    budgetTextSprite.setText('Budget: 100');
 
     this.input.keyboard.on('keydown-ONE', () => {
         handleKeyPress(this, 1);
@@ -369,7 +388,7 @@ function introduceCharacters(scene, dialogue) {
         setTimeout(() => {
             scene.state.playing = true;
             generatePolicies(scene);
-            updateChancellor(scene, 3);
+            updateChancellor(scene, 0);
         }, 1000);
         return;
     }
@@ -490,10 +509,10 @@ function handleKeyPress(scene, key) {
                 setTimeout(() => {
                     if (evil === characterIdx) {
                         // yippee we voted out the bad guy
-                        win(scene);
+                        win(scene, 'You voted out the spy!');
                     } else if (eliminated.length === 3) {
                         // we're out of good players, the bad guy wins
-                        lose(scene);
+                        lose(scene, 'You voted out everyone except the spy!');
                     } else {
                         // otherwise start the next round with one less player
                         scene.state.phase = 'selection';
@@ -517,7 +536,6 @@ function removePolicy(scene, selectedPolicy) {
     scene.state.currentPolicies.splice(selectedPolicy - 1, 1);
     setTimeout(() => {
         scene.state.phase = 'chancellor';
-        console.log('CHANCELLOR PHASE');
         chancellorChoose(scene);
     }, 1000);
 }
@@ -576,15 +594,23 @@ function chancellorChoose(scene) {
         }
         hideTextbox(scene);
         scrolls[discarded].destroy();
-        console.log('RIGHT BEFORE:', currentPolicies);
         currentPolicies.splice(discarded, 1);
-        console.log('RIGHT AFTER:', currentPolicies);
         const enacted = currentPolicies[0];
         const revolt = enacted.revolt_delta;
         const money = enacted.money_delta;
-        showTextbox(scene, 'POLICY ENACTED', `${enacted.text}\n${revolt >= 0 ? '+' : ''}${revolt} APPROVAL\n${money >= 0 ? '+' : ''}${money} MONEY`);
+        updateScoreboard(revolt, money);
+        console.log(`approval = ${approval}, budget = ${budget}`);
+        showTextbox(scene, 'POLICY ENACTED', `${enacted.text}\n${revolt >= 0 ? '+' : ''}${revolt} APPROVAL\n${money >= 0 ? '+' : ''}${money} BUDGET`);
         setTimeout(() => {
             hideTextbox(scene);
+            if (approval < 0) {
+                lose(scene, 'You ran out of approval!');
+                return;
+            }
+            if (budget < 0) {
+                lose(scene, 'You ran out of budget!');
+                return;
+            }
             currentPolicies.length = 0;
             for (const scroll of scrolls) {
                 if (scroll) scroll.destroy();
@@ -623,12 +649,23 @@ function startVote(scene) {
     scene.state.phase = 'voting';
 }
 
-function win(scene) {
-    scene.state.playing = false;
-    scene.add.sprite(config.width / 2, config.height / 2, 'winSprite').setScale(2.5).setDepth(100).play('win');
+function updateScoreboard(approvalDelta, budgetDelta) {
+    approval += approvalDelta;
+    budget += budgetDelta;
+    approvalTextSprite.setText(`Approval: ${approval}`);
+    budgetTextSprite.setText(`Budget: ${budget}`);
 }
 
-function lose(scene) {
+function win(scene, message) {
     scene.state.playing = false;
-    scene.add.sprite(config.width / 2, config.height / 2, 'loseSprite').setScale(2.5).setDepth(100).play('lose');
+    scene.add.sprite(config.width / 2, config.height / 2, 'winSprite').setScale(2.5).setDepth(5).play('win');
+    console.log(message);
+    showTextbox(scene, message, '');
+}
+
+function lose(scene, message) {
+    scene.state.playing = false;
+    scene.add.sprite(config.width / 2, config.height / 2, 'loseSprite').setScale(2.5).setDepth(5).play('lose');
+    console.log(message);
+    showTextbox(scene, message, '');
 }
