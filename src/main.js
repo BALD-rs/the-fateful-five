@@ -383,6 +383,111 @@ function generatePolicies(scene) {
     scrolls[2] = scene.add.image(1.25 * config.width / 2, .65 * config.height, 'scroll').setScale(1);
 }
 
+        const connectButton = document.getElementById('connectButton');
+        let port = null;
+        let reader = null;
+        let writer = null;
+
+        let textDecoder = new TextDecoder();
+
+        connectButton.addEventListener("click", async () => {
+            try {
+                port = await navigator.serial.requestPort();
+                await port.open({ baudRate: 9600 });
+
+                writer = port.writable.getWriter();
+
+                reader = port.readable.getReader();
+
+                (async () => {
+                    await prime([true,true,true,true]);
+                    console.log("SELECTION PRIMED. PREPARE FOR IMPACT.");
+                })();
+
+                console.log("Serial port opened and reader created.");
+
+                readData();
+            } catch (err) {
+                console.error("Failed to open serial port:", err);
+            }
+        });
+
+        async function readData() {
+            try {
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) {
+                        console.log("Reader has finished.");
+                        break;
+                    }
+
+                    // Decode the received bytes into a string
+                    const receivedText = textDecoder.decode(value);
+                    console.log("Received data:", receivedText);
+
+                    if (receivedText.trim() === "1") {
+                        simulateKeypress(49);
+                    }
+                    if (receivedText.trim() === "2") {
+                        simulateKeypress(50);
+                    }
+                    if (receivedText.trim() === "3") {
+                        simulateKeypress(51);
+                    }
+                    if (receivedText.trim() === "4") {
+                        simulateKeypress(52);
+                    }
+                }
+            } catch (err) {
+                console.error("Error reading from serial port:", err);
+            }
+        }
+
+        function simulateKeypress(keycode) {
+            const event = new KeyboardEvent('keydown', {
+                key: '1',         
+                code: 'Digit1',   
+                keyCode: keycode,     
+                which: 49,    
+                bubbles: true   
+            });
+            
+            document.dispatchEvent(event);
+        }
+
+        async function sendBytes(byteArray) {
+            if (!port || !port.writable) {
+                console.error("Serial port is not open.");
+                return;
+            }   
+
+            try {
+                const buffer = new Uint8Array(byteArray);
+                
+                await writer.write(buffer);
+                console.log("Sent bytes:", byteArray);
+            } catch (err) {
+                console.error("Error sending bytes:", err);
+            }
+        }
+
+        async function prime(array) {
+            var data =  [86];
+            for (val of array) {
+                if (val === true) {
+                    data.push(89);
+                } else {
+                    data.push(78);
+                }
+            }
+            await sendBytes(data);
+        }
+
+        // Manual Prime Button
+        document.getElementById('sendButton').addEventListener("click", async () => {
+            await prime([true, true,true, true]);
+        });
+
 function introduceCharacters(scene, dialogue) {
     if (dialogue.length == 0) {
         setTimeout(() => {
@@ -461,6 +566,10 @@ function shuffleArray(array) {
 function handleKeyPress(scene, key) {
     if (scene.state.playing) {
         if (scene.state.phase === 'selection') {
+            (async () => {
+                await prime([true,true,true,true]);
+                console.log("SELECTION PRIMED. PREPARE FOR IMPACT.");
+            })();
             if (scene.state.currentPolicies.length !== 3) {
                 console.log('something has perchance gone wrong');
                 return;
@@ -481,6 +590,7 @@ function handleKeyPress(scene, key) {
                 showTextbox(scene, `Policy ${key}`, policyDescription);
             } else {
                 // "debouncing is hard" -dawson 12:39am
+                // "it really is" -me 5:39am
                 // hideTextbox(scene);
                 // selectedPolicy = null;
             }
@@ -525,7 +635,17 @@ function handleKeyPress(scene, key) {
                     }
                 }, 1000);
             });
+        } else {
+            (async () => {
+                await prime([true,true,true,true]);
+                console.log("SELECTION PRIMED. PREPARE FOR IMPACT.");
+            })();
         }
+    } else {
+        (async () => {
+            await prime([true,true,true,true]);
+            console.log("SELECTION PRIMED. PREPARE FOR IMPACT.");
+        })();
     }
 }
 
@@ -636,11 +756,19 @@ function chancellorChoose(scene) {
 
 function startVote(scene) {
     const remaining = [];
+    var pressable = [];
     for (let i = 0; i < 4; i++) {
         if (!eliminated.includes(i)) {
             remaining.push(i);
+            pressable.push(true);
+        } else {
+            pressable.push(false);
         }
     }
+    (async () => {
+        await prime(pressable);
+        console.log("VOTE PRIMED. PREPARE FOR IMPACT.");
+    })();
     let text = '';
     for (const i of remaining) {
         text += `Press ${i+1} to eliminate ${characterTitles[i]}\n`;
