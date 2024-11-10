@@ -169,6 +169,16 @@ const policies = [
         "revolt_delta": 25,
         "money_delta": -25
     },
+    {
+        "text": "Require turtleneck sweaters",
+        "revolt_delta": -5,
+        "money_delta": -5
+    },
+    {
+        "text": "Delete Government",
+        "revolt_delta": 1000,
+        "money_delta": -1000
+    },
 ]
 
 const config = {
@@ -861,6 +871,10 @@ function win(scene, message) {
     scene.add.sprite(config.width / 2, config.height / 2, 'winSprite').setScale(2.5).setDepth(5).play('win');
     console.log(message);
     showTextbox(scene, message, '');
+
+    sendEndSignal();
+
+    document.addEventListener('keydown', refreshPageOnKeyPress);
 }
 
 function lose(scene, message) {
@@ -868,4 +882,17 @@ function lose(scene, message) {
     scene.add.sprite(config.width / 2, config.height / 2, 'loseSprite').setScale(2.5).setDepth(5).play('lose');
     console.log(message);
     showTextbox(scene, message, '');
+
+    sendEndSignal();
+
+    document.addEventListener('keydown', refreshPageOnKeyPress);
+}
+
+async function sendEndSignal() {
+    await sendBytes([69, 69, 69, 69, 69]);
+    console.log("End game signal sent.");
+}
+
+function refreshPageOnKeyPress() {
+    location.reload();
 }
