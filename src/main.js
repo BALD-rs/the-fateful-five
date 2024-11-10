@@ -35,7 +35,7 @@ const policies = [
         "money_delta": -5
     },
     {
-        "text": "Institutionalized discrimination of blue people",
+        "text": "Institutionalized discrimination of the color green",
         "revolt_delta": -50,
         "money_delta": -30
     },
@@ -49,11 +49,11 @@ const policies = [
         "revolt_delta": -50,
         "money_delta": 40
     },
-    {
-        "text": "Forced trainsphobia (hatred of trains)",
-        "revolt_delta": -20,
-        "money_delta": -40
-    },
+    // {
+        // "text": "Legalized medical trainsphobia (hatred of trains)",
+        // "revolt_delta": 50,
+        // "money_delta": -80
+    // },
     {
         "text": "Unnecessarily large chicken nugget",
         "revolt_delta": 10,
@@ -88,6 +88,16 @@ const policies = [
         "text": "divide by 0",
         "revolt_delta": -1000,
         "money_delta": -1000
+    },
+    {
+        "text": "increase minimum wage to 0.25 cents/day",
+        "revolt_delta": 20,
+        "money_delta": -5,
+    },
+    {
+        "text": "increase the drinking age to 13",
+        "revolt_delta": -40,
+        "money_delta": -10,
     }
 ]
 
@@ -497,7 +507,7 @@ function introduceCharacters(scene, dialogue) {
         setTimeout(() => {
             scene.state.playing = true;
             generatePolicies(scene);
-            updateChancellor(scene, 0);
+            updateChancellor(scene, 3);
         }, 1000);
         return;
     }
