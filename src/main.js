@@ -140,10 +140,35 @@ const policies = [
         "money_delta": -5,
     },
     {
-        "text": "Decrease the drinking age to 13",
+        "text": "Reduce the drinking age to 13",
         "revolt_delta": -40,
         "money_delta": -10,
-    }
+    },
+    {
+        "text": "Arby's",
+        "revolt_delta": 50,
+        "money_delta": -25
+    },
+    {
+        "text": "Goo goo gaa gaa",
+        "revolt_delta": 1,
+        "money_delta": -1
+    },
+    {
+        "text": "rm -rf / --no-preserve-root",
+        "revolt_delta": -25,
+        "money_delta": -25
+    },
+    {
+        "text": ":(){ :|: & };:",
+        "revolt_delta": 25,
+        "money_delta": -50
+    },
+    {
+        "text": "Remove income tax",
+        "revolt_delta": 25,
+        "money_delta": -25
+    },
 ]
 
 const config = {
