@@ -110,6 +110,21 @@ const policies = [
         "money_delta": -20
     },
     {
+        "text": "Enstate Dr. Casa as head of medicine",
+        "revolt_delta": 25,
+        "money_delta": -5
+    },
+    {
+        "text": "Translate all C to Rust (good)",
+        "revolt_delta": 100,
+        "money_delta": -75
+    },
+    {
+        "text": "Implement 'special' interrogation techniques",
+        "revolt_delta": -10,
+        "money_delta": 5
+    },
+    {
         "text": "Ban the use of Github, BitBucket is new standard",
         "revolt_delta": -10,
         "money_delta": 0
