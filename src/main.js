@@ -314,6 +314,12 @@ function preload() {
     this.load.audio('clydeVotedOut', 'assets/audio/Clyde-Voted-Out.mp3');
     this.load.audio('casaVotedOut', 'assets/audio/Casa-Voted-Out.mp3');
     this.load.audio('ajVotedOut', 'assets/audio/AJ-Voted-Out.mp3');
+    this.load.audio('ajJuice', 'assets/audio/AJ-Juice.mp3');
+    this.load.audio('ajPsychoticBreak', 'assets/audio/AJ-Psychotic-Break-v2.mp3');
+    this.load.audio('casaMonologue', 'assets/audio/Casa-Monologue-Pro-Max.mp3');
+    this.load.audio('casaVicodino', 'assets/audio/Casa-Vicodino.mp3');
+    this.load.audio('clydePtsd', 'assets/audio/Clyde-PTSD.mp3');
+    this.load.audio('clydeFunny', 'assets/audio/Clyde-funny.mp3');
 }
 
 function create() {
@@ -418,6 +424,12 @@ function create() {
     this.input.keyboard.on('keydown-FOUR', () => {
         handleKeyPress(this, 4);
     });
+    this.input.keyboard.on('keydown-ENTER', () => {
+        handleKeyPress(this, 4);
+    });
+    this.input.keyboard.on('keydown-Z', () => {
+        handleKeyPress(this, 'z');
+    });
 
     sounds.dogIntro = this.sound.add('dogIntro');
     sounds.clydeIntro = this.sound.add('clydeIntro');
@@ -435,6 +447,12 @@ function create() {
     sounds.clydeVotedOut = this.sound.add('clydeVotedOut');
     sounds.casaVotedOut = this.sound.add('casaVotedOut');
     sounds.ajVotedOut = this.sound.add('ajVotedOut');
+    sounds.ajJuice = this.sound.add('ajJuice');
+    sounds.ajPsychoticBreak = this.sound.add('ajPsychoticBreak');
+    sounds.casaMonologue = this.sound.add('casaMonologue');
+    sounds.casaVicodino = this.sound.add('casaVicodino');
+    sounds.clydePtsd = this.sound.add('clydePtsd');
+    sounds.clydeFunny = this.sound.add('clydeFunny');
 
     this.input.keyboard.on('keydown', (event) => {
         if (!this.state.hasIntroduced) {
@@ -653,6 +671,9 @@ function shuffleArray(array) {
 
 
 function handleKeyPress(scene, key) {
+    if (key === 'z') {
+        playRandomAudio();
+    }
     if (scene.state.playing) {
         if (scene.state.phase === 'selection') {
             if (scene.state.currentPolicies.length !== 3) {
@@ -852,6 +873,13 @@ function startVote(scene) {
     }
     showTextbox(scene, 'VOTE TO ELIMINATE', text);
     scene.state.phase = 'voting';
+}
+
+function playRandomAudio() {
+    const audioKeys = ['ajJuice', 'ajPsychoticBreak', 'casaMonologue', 'casaVicodino', 'clydePtsd', 'clydeFunny'];
+    const randomIndex = Math.floor(Math.random() * audioKeys.length);
+    const randomAudio = sounds[audioKeys[randomIndex]];
+    randomAudio.play();
 }
 
 function updateScoreboard(approvalDelta, budgetDelta) {
