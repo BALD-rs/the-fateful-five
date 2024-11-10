@@ -14,12 +14,29 @@ let gameState = {
 }
 
 
-
 function preload() {
     this.load.spritesheet('backgroundSprite', 'assets/sprites/background.png', {
         frameWidth: 200,
         frameHeight: 100,
     });
+
+    this.load.spritesheet('dogSprite', 'assets/sprites/dog.png', {
+        frameWidth: 1600,
+        frameHeight: 800,
+    });
+    this.load.spritesheet('clydeSprite', 'assets/sprites/CLYDE.png', {
+        frameWidth: 1600,
+        frameHeight: 800,
+    });
+    this.load.spritesheet('casaSprite', 'assets/sprites/drcasa.png', {
+        frameWidth: 1600,
+        frameHeight: 800,
+    });
+    this.load.spritesheet('ajSprite', 'assets/sprites/aj-sampson.png', {
+        frameWidth: 1600,
+        frameHeight: 800,
+    });
+
     this.load.image('scroll', 'assets/sprites/scroll.png');
     this.load.audio('clydeIntro', 'assets/audio/Clyde-Intro.mp3');
     this.load.audio('casaIntro', 'assets/audio/Casa-Intro.mp3');
@@ -36,7 +53,48 @@ function create() {
         frameRate: 10,
         repeat: -1,
     })
+    this.anims.create({
+        key: 'dog',
+        frames: this.anims.generateFrameNumbers('dogSprite', {
+            start: 0,
+            end: 1
+        }),
+        frameRate: 3,
+        repeat: -1,
+    })
+    this.anims.create({
+        key: 'clyde',
+        frames: this.anims.generateFrameNumbers('clydeSprite', {
+            start: 0,
+            end: 1
+        }),
+        frameRate: 5,
+        repeat: -1,
+    })
+    this.anims.create({
+        key: 'casa',
+        frames: this.anims.generateFrameNumbers('casaSprite', {
+            start: 0,
+            end: 1
+        }),
+        frameRate: 3,
+        repeat: -1,
+    })
+    this.anims.create({
+        key: 'aj',
+        frames: this.anims.generateFrameNumbers('ajSprite', {
+            start: 0,
+            end: 1
+        }),
+        frameRate: 3,
+        repeat: -1,
+    })
+
     this.add.sprite(config.width / 2, config.height / 2, 'backgroundSprite').setScale(8).play('background');
+    this.add.sprite(config.width / 2, config.height / 2, 'dogSprite').play('dog');
+    this.add.sprite(config.width / 2, config.height / 2, 'clydeSprite').play('clyde');
+    this.add.sprite(config.width / 2, config.height / 2, 'casaSprite').play('casa');
+    this.add.sprite(config.width / 2, config.height / 2, 'ajSprite').play('aj');
     const scroll1 = this.add.image(.75 * config.width / 2, 3 * config.height / 4, 'scroll').setScale(1.5);
     const scroll2 = this.add.image(config.width / 2, 3 * config.height / 4, 'scroll').setScale(1.5);
     const scroll3 = this.add.image(1.25 * config.width / 2, 3 * config.height / 4, 'scroll').setScale(1.5);
