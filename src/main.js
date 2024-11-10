@@ -381,6 +381,10 @@ function generatePolicies(scene) {
     scrolls[0] = scene.add.image(.75 * config.width / 2, .65 * config.height, 'scroll').setScale(1);
     scrolls[1] = scene.add.image(config.width / 2, .65 * config.height, 'scroll').setScale(1);
     scrolls[2] = scene.add.image(1.25 * config.width / 2, .65 * config.height, 'scroll').setScale(1);
+    (async () => {
+        await sendBytes([80,80,80,80,80])
+        console.log("policy PRIMED. PREPARE FOR oj.");
+    })();
 }
 
         const connectButton = document.getElementById('connectButton');
@@ -400,7 +404,7 @@ function generatePolicies(scene) {
                 reader = port.readable.getReader();
 
                 (async () => {
-                    await prime([true,true,true,true]);
+                    await sendBytes([83,83,83,83,83])
                     console.log("SELECTION PRIMED. PREPARE FOR IMPACT.");
                 })();
 
@@ -566,10 +570,6 @@ function shuffleArray(array) {
 function handleKeyPress(scene, key) {
     if (scene.state.playing) {
         if (scene.state.phase === 'selection') {
-            (async () => {
-                await prime([true,true,true,true]);
-                console.log("SELECTION PRIMED. PREPARE FOR IMPACT.");
-            })();
             if (scene.state.currentPolicies.length !== 3) {
                 console.log('something has perchance gone wrong');
                 return;
@@ -636,16 +636,8 @@ function handleKeyPress(scene, key) {
                 }, 1000);
             });
         } else {
-            (async () => {
-                await prime([true,true,true,true]);
-                console.log("SELECTION PRIMED. PREPARE FOR IMPACT.");
-            })();
         }
     } else {
-        (async () => {
-            await prime([true,true,true,true]);
-            console.log("SELECTION PRIMED. PREPARE FOR IMPACT.");
-        })();
     }
 }
 
