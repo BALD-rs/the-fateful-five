@@ -6,10 +6,10 @@
 **The Fateful Five** is a browser-based game built with [Phaser](https://phaser.io/) and Vite, hosted at [fiveguysmurdersandlies.us](https://fiveguysmurdersandlies.us). The game centers around four unique characters and an immersive storyline.
 
 ## Characters
+- **Teddy K. the Dog** - Loyal and ever-present companion
 - **Clyde** - A hardened Vietnam War vet
-- **AJ Sampson** - A former football player, now an apple juice carton
 - **Dr. Casa** - A snide M.D. with a thoughtful sombrero
-- **Dog** - Loyal and ever-present companion
+- **AJ Sampson** - A former football player, now an apple juice carton
 
 ## Features
 - **Authentication**: Auth0 integration for username-based authentication
