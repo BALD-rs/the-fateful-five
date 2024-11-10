@@ -102,6 +102,7 @@ const config = {
 };
 
 const SHUFFLE_POLICIES = true;
+const SKIP_INTRO = true;
 const defaultPolicy = {
     "text": "Kill everyone",
     "revolt_delta": -100,
@@ -113,13 +114,38 @@ const game = new Phaser.Game(config);
 let textboxSprite = null;
 let textboxTitle = null;
 let textboxDescription = null;
+let chancellorSprite = null;
 const scrolls = [null, null, null];
+const sounds = {};
 
+const characters = [
+    'dog',
+    'clyde',
+    'casa',
+    'aj',
+]
+const characterTitles = [
+    'Teddy K.',
+    'Clyde',
+    'Dr. Casa',
+    'AJ Sampson',
+]
 const lines = {
+    dogIntro: "What up it's Teddy K. I think the industrial revolution is overrated.",
     clydeIntro: 'In the jungle they called me Clyde. You can too.',
     casaIntro: "I'm Casa. You can relax. I'm not here to make friends.",
     ajIntro: "Name's AJ Sampson. Let's see if I can bring a little of that old charm to the table.",
+    dogChancellor: "IT'S CHANCELLIN TIME !!!",
+    clydeChancellor: "IT'S CHANCELLIN TIME !!!",
+    casaChancellor: "IT'S CHANCELLIN TIME !!!",
+    ajChancellor: "IT'S CHANCELLIN TIME !!!",
 }
+const chancellorPositions = [
+    [260, config.height / 6],
+    [780, config.height / 9],
+    [1220, config.height / 8],
+    [config.width - 350, config.height / 5],
+]
 
 function preload() {
     this.state = {
@@ -155,9 +181,20 @@ function preload() {
 
     this.load.image('scroll', 'assets/sprites/scroll.png');
     this.load.image('textbox', 'assets/sprites/textbox.png');
+    this.load.image('chancellor', 'assets/sprites/chancellor.png');
+
+    this.load.audio('dogIntro', 'assets/audio/Dog-Intro.mp3');
     this.load.audio('clydeIntro', 'assets/audio/Clyde-Intro.mp3');
     this.load.audio('casaIntro', 'assets/audio/Casa-Intro.mp3');
     this.load.audio('ajIntro', 'assets/audio/AJ-Intro.mp3');
+    this.load.audio('dogChancellor', 'assets/audio/Dog-Chancellor.mp3');
+    this.load.audio('clydeChancellor', 'assets/audio/Clyde-Chancellor.mp3');
+    this.load.audio('casaChancellor', 'assets/audio/Casa-Chancellor.mp3');
+    this.load.audio('ajChancellor', 'assets/audio/AJ-Chancellor.mp3');
+    this.load.audio('dogDiscardPolicy', 'assets/audio/Dog-Discard-Policy.mp3');
+    this.load.audio('clydeDiscardPolicy', 'assets/audio/Clyde-Discard-Policy.mp3');
+    this.load.audio('casaDiscardPolicy', 'assets/audio/Casa-Discard-Policy.mp3');
+    this.load.audio('ajDiscardPolicy', 'assets/audio/AJ-Discard-Policy.mp3');
 }
 
 function create() {
@@ -212,7 +249,7 @@ function create() {
     this.add.sprite(config.width / 2, config.height / 2, 'clydeSprite').play('clyde');
     this.add.sprite(config.width / 2, config.height / 2, 'casaSprite').play('casa');
     this.add.sprite(config.width / 2, config.height / 2, 'ajSprite').play('aj');
-    this.textboxSprite = null;
+    chancellorSprite = this.add.image(3000, 3000, 'chancellor').setScale(1.7);
 
     this.input.keyboard.on('keydown-ONE', () => {
         handleKeyPress(this, 1);
@@ -227,15 +264,27 @@ function create() {
         handleKeyPress(this, 4);
     });
 
-    const clydeIntro = this.sound.add('clydeIntro');
-    const casaIntro = this.sound.add('casaIntro');
-    const ajIntro = this.sound.add('ajIntro');
+    sounds.dogIntro = this.sound.add('dogIntro');
+    sounds.clydeIntro = this.sound.add('clydeIntro');
+    sounds.casaIntro = this.sound.add('casaIntro');
+    sounds.ajIntro = this.sound.add('ajIntro');
+    sounds.dogChancellor = this.sound.add('dogChancellor');
+    sounds.clydeChancellor = this.sound.add('clydeChancellor');
+    sounds.casaChancellor = this.sound.add('casaChancellor');
+    sounds.ajChancellor = this.sound.add('ajChancellor');
+    sounds.dogDiscardPolicy = this.sound.add('dogDiscardPolicy');
+    sounds.clydeDiscardPolicy = this.sound.add('clydeDiscardPolicy');
+    sounds.casaDiscardPolicy = this.sound.add('casaDiscardPolicy');
+    sounds.ajDiscardPolicy = this.sound.add('ajDiscardPolicy');
 
     this.input.keyboard.on('keydown', (event) => {
         if (!this.state.hasIntroduced) {
             this.state.hasIntroduced = true;
-            // introduceCharacters(this, [['Clyde', clydeIntro, lines.clydeIntro], ['Dr. Casa', casaIntro, lines.casaIntro], ['AJ Sampson', ajIntro, lines.ajIntro]]);
-            introduceCharacters(this, []);
+            if (SKIP_INTRO) {
+                introduceCharacters(this, []);
+            } else {
+                introduceCharacters(this, [['Teddy K.', sounds.dogIntro, lines.dogIntro], ['Clyde', sounds.clydeIntro, lines.clydeIntro], ['Dr. Casa', sounds.casaIntro, lines.casaIntro], ['AJ Sampson', sounds.ajIntro, lines.ajIntro]]);
+            }
         }
     });
 
@@ -246,7 +295,7 @@ function create() {
 
 function update() {
     if (this.state.playing) {
-        if (!scrolls[0] && !scroll[1] && !scroll[2]) {
+        if (this.state.phase === 'selection' && !scrolls[0] && !scroll[1] && !scroll[2]) {
             generatePolicies(this);
         }
     }
@@ -266,6 +315,7 @@ function introduceCharacters(scene, dialogue) {
     if (dialogue.length == 0) {
         setTimeout(() => {
             scene.state.playing = true;
+            updateChancellor(scene, 0);
         }, 1000);
         return;
     }
@@ -343,9 +393,10 @@ function handleKeyPress(scene, key) {
             }
             // selecting between policies
             if ([1,2,3].includes(selectedPolicy) && key === 4) {
+                // submit the selected policy
                 hideTextbox(scene);
                 removePolicy(scene, selectedPolicy);
-            } else if (selectedPolicy === null && key !== 4) {
+            } else if (key !== 4) {
                 // set the selected policy
                 selectedPolicy = key;
                 hideTextbox(scene);
@@ -355,8 +406,9 @@ function handleKeyPress(scene, key) {
                 const policyDescription = `Description: ${policy.text}\nRevolt ${revolt >= 0 ? 'INCREASES' : 'DECREASES'} by ${revolt}\nBudget ${money >= 0 ? 'INCREASES' : 'DECREASES'} by ${money}`;
                 showTextbox(scene, `Policy ${key}`, policyDescription);
             } else {
-                hideTextbox(scene);
-                selectedPolicy = null;
+                // "debouncing is hard" -dawson 12:39am
+                // hideTextbox(scene);
+                // selectedPolicy = null;
             }
         }
     }
@@ -373,5 +425,24 @@ function removePolicy(scene, selectedPolicy) {
 }
 
 function updateChancellor(scene, newChancellor) {
+    if (newChancellor < 0 || newChancellor > 3) {
+        console.error('invalid new chancellor');
+        return;
+    }
     scene.state.chancellor = newChancellor;
+    if (chancellorSprite) {
+        const [newX, newY] = chancellorPositions[newChancellor];
+        chancellorSprite.setPosition(newX, newY);
+    }
+    const chancellorString = `${characters[newChancellor]}Chancellor`;
+    const chancellorAnnouncement = sounds[chancellorString];
+    if (!chancellorAnnouncement || !lines[chancellorString]) {
+        console.error('something terrible has happened');
+        return;
+    }
+    showTextbox(scene, characterTitles[newChancellor], lines[chancellorString]);
+    chancellorAnnouncement.play();
+    chancellorAnnouncement.on('complete', () => {
+        hideTextbox(scene);
+    })
 }
