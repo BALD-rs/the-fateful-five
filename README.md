@@ -14,6 +14,7 @@
 ## Features
 - **Authentication**: Auth0 integration for username-based authentication
 - **Dynamic Gameplay**: Built with Phaser for responsive, interactive experiences
+- **Accessibility Hardware Addon**: Can be found at https://github.com/BALD-rs/Hack-K-State-2024-Hardware
 
 ## Setup & Development
 1. Clone this repository:
