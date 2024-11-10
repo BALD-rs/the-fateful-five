@@ -197,11 +197,11 @@ function preload() {
         frameWidth: 1600,
         frameHeight: 800,
     });
-    this.load.spritesheet('casaSprite', 'assets/sprites/drcasa.png', {
+    this.load.spritesheet('casaSprite', 'assets/sprites/drcasamus.png', {
         frameWidth: 1600,
         frameHeight: 800,
     });
-    this.load.spritesheet('ajSprite', 'assets/sprites/aj-sampson.png', {
+    this.load.spritesheet('ajSprite', 'assets/sprites/ajsamsontalk.png', {
         frameWidth: 1600,
         frameHeight: 800,
     });
