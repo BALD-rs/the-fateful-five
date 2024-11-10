@@ -108,6 +108,7 @@ const defaultPolicy = {
     "revolt_delta": -100,
     "money_delta": 100
 };
+let policyIdx = 0;
 let selectedPolicy = null;
 
 const game = new Phaser.Game(config);
@@ -118,7 +119,10 @@ let textboxDescription = null;
 let chancellorSprite = null;
 const scrolls = [null, null, null];
 const sounds = {};
+const sprites = {};
 const eliminated = [];
+
+let cp;
 
 const characters = [
     'dog',
@@ -145,6 +149,10 @@ const lines = {
     clydeDiscardPolicy: "this policy is trash lil bro",
     casaDiscardPolicy: "this policy is trash lil bro",
     ajDiscardPolicy: "this policy is trash lil bro",
+    dogVotedOut: "can't believe you would vote me out lil bro",
+    clydeVotedOut: "can't believe you would vote me out lil bro",
+    casaVotedOut: "can't believe you would vote me out lil bro",
+    ajVotedOut: "can't believe you would vote me out lil bro",
 }
 const chancellorPositions = [
     [260, config.height / 6],
@@ -161,6 +169,7 @@ function preload() {
         currentPolicies: [],
         currentChancellor: null,
     }
+    cp = this.state.currentPolicies;
     console.log(`EVIL CHARACTER IS: ${characterTitles[evil]}`);
     console.log('SELECTION PHASE');
 
@@ -185,6 +194,14 @@ function preload() {
         frameWidth: 1600,
         frameHeight: 800,
     });
+    this.load.spritesheet('winSprite', 'assets/sprites/win.png', {
+        frameWidth: 640,
+        frameHeight: 360,
+    });
+    this.load.spritesheet('loseSprite', 'assets/sprites/lose.png', {
+        frameWidth: 640,
+        frameHeight: 360,
+    });
 
     this.load.image('scroll', 'assets/sprites/scroll.png');
     this.load.image('textbox', 'assets/sprites/textbox.png');
@@ -202,6 +219,10 @@ function preload() {
     this.load.audio('clydeDiscardPolicy', 'assets/audio/Clyde-Discard-Policy.mp3');
     this.load.audio('casaDiscardPolicy', 'assets/audio/Casa-Discard-Policy.mp3');
     this.load.audio('ajDiscardPolicy', 'assets/audio/AJ-Discard-Policy.mp3');
+    this.load.audio('dogVotedOut', 'assets/audio/Dog-Voted-Out.mp3');
+    this.load.audio('clydeVotedOut', 'assets/audio/Clyde-Voted-Out.mp3');
+    this.load.audio('casaVotedOut', 'assets/audio/Casa-Voted-Out.mp3');
+    this.load.audio('ajVotedOut', 'assets/audio/AJ-Voted-Out.mp3');
 }
 
 function create() {
@@ -250,12 +271,30 @@ function create() {
         frameRate: 3,
         repeat: -1,
     })
+    this.anims.create({
+        key: 'win',
+        frames: this.anims.generateFrameNumbers('winSprite', {
+            start: 0,
+            end: 3
+        }),
+        frameRate: 3,
+        repeat: -1,
+    })
+    this.anims.create({
+        key: 'lose',
+        frames: this.anims.generateFrameNumbers('loseSprite', {
+            start: 0,
+            end: 9
+        }),
+        frameRate: 3,
+        repeat: -1,
+    })
 
     this.add.sprite(config.width / 2, config.height / 2, 'backgroundSprite').setScale(8).play('background');
-    this.add.sprite(config.width / 2, config.height / 2, 'dogSprite').play('dog');
-    this.add.sprite(config.width / 2, config.height / 2, 'clydeSprite').play('clyde');
-    this.add.sprite(config.width / 2, config.height / 2, 'casaSprite').play('casa');
-    this.add.sprite(config.width / 2, config.height / 2, 'ajSprite').play('aj');
+    sprites.dog = this.add.sprite(config.width / 2, config.height / 2, 'dogSprite').play('dog');
+    sprites.clyde = this.add.sprite(config.width / 2, config.height / 2, 'clydeSprite').play('clyde');
+    sprites.casa = this.add.sprite(config.width / 2, config.height / 2, 'casaSprite').play('casa');
+    sprites.aj = this.add.sprite(config.width / 2, config.height / 2, 'ajSprite').play('aj');
     chancellorSprite = this.add.image(3000, 3000, 'chancellor').setScale(1.7);
 
     this.input.keyboard.on('keydown-ONE', () => {
@@ -283,6 +322,10 @@ function create() {
     sounds.clydeDiscardPolicy = this.sound.add('clydeDiscardPolicy');
     sounds.casaDiscardPolicy = this.sound.add('casaDiscardPolicy');
     sounds.ajDiscardPolicy = this.sound.add('ajDiscardPolicy');
+    sounds.dogVotedOut = this.sound.add('dogVotedOut');
+    sounds.clydeVotedOut = this.sound.add('clydeVotedOut');
+    sounds.casaVotedOut = this.sound.add('casaVotedOut');
+    sounds.ajVotedOut = this.sound.add('ajVotedOut');
 
     this.input.keyboard.on('keydown', (event) => {
         if (!this.state.hasIntroduced) {
@@ -301,17 +344,20 @@ function create() {
 }
 
 function update() {
-    if (this.state.playing) {
-        if (this.state.phase === 'selection' && scrolls.length === 3 && !scrolls[0] && !scroll[1] && !scroll[2]) {
-            generatePolicies(this);
-        }
-    }
+    // if (this.state.playing) {
+    //     if (this.state.phase === 'selection' && scrolls.length === 3 && !scrolls[0] && !scroll[1] && !scroll[2]) {
+    //         generatePolicies(this);
+    //     }
+    // }
 }
 
 function generatePolicies(scene) {
+    scene.state.currentPolicies.length = 0;
+    scrolls.length = 0;
     for (let i = 0; i < 3; i++) {
-        const policy = policies.length > 0 ? policies.pop() : defaultPolicy;
-        scene.state.currentPolicies.push(policy);
+        scene.state.currentPolicies.push(policies[policyIdx]);
+        policyIdx = (policyIdx + 1) % policies.length;
+        scrolls.push(null);
     }
     scrolls[0] = scene.add.image(.75 * config.width / 2, .65 * config.height, 'scroll').setScale(1);
     scrolls[1] = scene.add.image(config.width / 2, .65 * config.height, 'scroll').setScale(1);
@@ -322,7 +368,8 @@ function introduceCharacters(scene, dialogue) {
     if (dialogue.length == 0) {
         setTimeout(() => {
             scene.state.playing = true;
-            updateChancellor(scene, 0);
+            generatePolicies(scene);
+            updateChancellor(scene, 3);
         }, 1000);
         return;
     }
@@ -340,6 +387,7 @@ function introduceCharacters(scene, dialogue) {
         hideTextbox(scene);
         setTimeout(() => {
             scene.state.playing = true;
+            generatePolicies(scene);
             updateChancellor(scene, 0);
         }, 1000);
     });
@@ -408,7 +456,7 @@ function handleKeyPress(scene, key) {
                 selectedPolicy = key;
                 hideTextbox(scene);
                 const policy = scene.state.currentPolicies[selectedPolicy - 1];
-                const revolt = policy.revolt_delta; // invert this cuz of how we're showing the bars in-game
+                const revolt = policy.revolt_delta;
                 const money = policy.money_delta;
                 const policyDescription = `Description: ${policy.text}\nApproval ${revolt >= 0 ? 'INCREASES' : 'DECREASES'} by ${revolt}\nBudget ${money >= 0 ? 'INCREASES' : 'DECREASES'} by ${money}`;
                 showTextbox(scene, `Policy ${key}`, policyDescription);
@@ -417,6 +465,47 @@ function handleKeyPress(scene, key) {
                 // hideTextbox(scene);
                 // selectedPolicy = null;
             }
+        } else if (scene.state.phase === 'voting') {
+            const characterIdx = key - 1;
+            if (eliminated.includes(characterIdx)) {
+                console.log(`can't eliminate ${characterTitles[characterIdx]}, he's already gone`);
+                return;
+            }
+
+            console.log(`voting out ${characterTitles[characterIdx]}`);
+            hideTextbox(scene);
+
+            const votedString = `${characters[characterIdx]}VotedOut`;
+            const votedAnnouncement = sounds[votedString];
+            if (!votedAnnouncement || !lines[votedString]) {
+                console.error('something terrible has happened pt. 3');
+                return;
+            }
+            showTextbox(scene, characterTitles[characterIdx], lines[votedString]);
+            votedAnnouncement.play();
+            votedAnnouncement.on('complete', () => {
+                hideTextbox(scene);
+                sprites[characters[characterIdx]].destroy();
+                eliminated.push(characterIdx);
+                setTimeout(() => {
+                    if (evil === characterIdx) {
+                        // yippee we voted out the bad guy
+                        win(scene);
+                    } else if (eliminated.length === 3) {
+                        // we're out of good players, the bad guy wins
+                        lose(scene);
+                    } else {
+                        // otherwise start the next round with one less player
+                        scene.state.phase = 'selection';
+                        let firstChancellor = 0;
+                        while (eliminated.includes(firstChancellor)) {
+                            firstChancellor++;
+                        }
+                        generatePolicies(scene);
+                        updateChancellor(scene, firstChancellor);
+                    }
+                }, 1000);
+            });
         }
     }
 }
@@ -478,16 +567,21 @@ function chancellorChoose(scene) {
     // if evil, discard the better policy, otherwise discard the worse policy
     const discarded = chancellor === evil ? betterPolicy : worsePolicy;
     showTextbox(scene, characterTitles[chancellor] + ' (Chancellor)', lines[discardString] + `\n(Discards the ${discarded === 0 ? 'left' : 'right'} policy)`);
-    console.log('SCROLLS 1', scrolls);
     discardAnnouncement.play();
     discardAnnouncement.on('complete', () => {
+        if (currentPolicies.length !== 2) {
+            // console.log('I HAVE NO CLUE WHY THIS HAPPENS BUT THIS GUARD CLAUSE SEEMS TO FIX IT');
+            // idk bro it's 3am
+            return;
+        }
         hideTextbox(scene);
         scrolls[discarded].destroy();
+        console.log('RIGHT BEFORE:', currentPolicies);
         currentPolicies.splice(discarded, 1);
+        console.log('RIGHT AFTER:', currentPolicies);
         const enacted = currentPolicies[0];
         const revolt = enacted.revolt_delta;
         const money = enacted.money_delta;
-        console.log('SCROLLS 2', scrolls);
         showTextbox(scene, 'POLICY ENACTED', `${enacted.text}\n${revolt >= 0 ? '+' : ''}${revolt} APPROVAL\n${money >= 0 ? '+' : ''}${money} MONEY`);
         setTimeout(() => {
             hideTextbox(scene);
@@ -499,11 +593,16 @@ function chancellorChoose(scene) {
             scrolls.push(null);
             scrolls.push(null);
             scrolls.push(null);
-            if (scene.state.currentChancellor === 3) {
+            let nextChancellor = scene.state.currentChancellor + 1;
+            while (eliminated.includes(nextChancellor)) {
+                nextChancellor++;
+            }
+            if (nextChancellor >= 4) {
                 startVote(scene);
             } else {
                 scene.state.phase = 'selection';
-                updateChancellor(scene, scene.state.currentChancellor + 1);
+                generatePolicies(scene);
+                updateChancellor(scene, nextChancellor);
             }
         }, 3000);
     });
@@ -522,4 +621,14 @@ function startVote(scene) {
     }
     showTextbox(scene, 'VOTE TO ELIMINATE', text);
     scene.state.phase = 'voting';
+}
+
+function win(scene) {
+    scene.state.playing = false;
+    scene.add.sprite(config.width / 2, config.height / 2, 'winSprite').setScale(2.5).setDepth(100).play('win');
+}
+
+function lose(scene) {
+    scene.state.playing = false;
+    scene.add.sprite(config.width / 2, config.height / 2, 'loseSprite').setScale(2.5).setDepth(100).play('lose');
 }
