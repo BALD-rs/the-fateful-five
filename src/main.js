@@ -408,9 +408,9 @@ function handleKeyPress(scene, key) {
                 selectedPolicy = key;
                 hideTextbox(scene);
                 const policy = scene.state.currentPolicies[selectedPolicy - 1];
-                const revolt = -policy.revolt_delta; // invert this cuz of how we're showing the bars in-game
+                const revolt = policy.revolt_delta; // invert this cuz of how we're showing the bars in-game
                 const money = policy.money_delta;
-                const policyDescription = `Description: ${policy.text}\nRevolt ${revolt >= 0 ? 'INCREASES' : 'DECREASES'} by ${revolt}\nBudget ${money >= 0 ? 'INCREASES' : 'DECREASES'} by ${money}`;
+                const policyDescription = `Description: ${policy.text}\nApproval ${revolt >= 0 ? 'INCREASES' : 'DECREASES'} by ${revolt}\nBudget ${money >= 0 ? 'INCREASES' : 'DECREASES'} by ${money}`;
                 showTextbox(scene, `Policy ${key}`, policyDescription);
             } else {
                 // "debouncing is hard" -dawson 12:39am
@@ -485,10 +485,10 @@ function chancellorChoose(scene) {
         scrolls[discarded].destroy();
         currentPolicies.splice(discarded, 1);
         const enacted = currentPolicies[0];
-        const revolt = -enacted.revolt_delta;
+        const revolt = enacted.revolt_delta;
         const money = enacted.money_delta;
         console.log('SCROLLS 2', scrolls);
-        showTextbox(scene, 'POLICY ENACTED', `${enacted.text}\n${revolt >= 0 ? '+' : ''}${revolt} REVOLT\n${money >= 0 ? '+' : ''}${money} MONEY`);
+        showTextbox(scene, 'POLICY ENACTED', `${enacted.text}\n${revolt >= 0 ? '+' : ''}${revolt} APPROVAL\n${money >= 0 ? '+' : ''}${money} MONEY`);
         setTimeout(() => {
             hideTextbox(scene);
             currentPolicies.length = 0;
@@ -500,8 +500,7 @@ function chancellorChoose(scene) {
             scrolls.push(null);
             scrolls.push(null);
             if (scene.state.currentChancellor === 3) {
-                scene.state.phase = 'voting';
-                // startVote(scene);
+                startVote(scene);
             } else {
                 scene.state.phase = 'selection';
                 updateChancellor(scene, scene.state.currentChancellor + 1);
@@ -518,8 +517,9 @@ function startVote(scene) {
         }
     }
     let text = '';
-    for (const ith of remaining) {
-        text += `${characters[ith]}: ${votes[ith]}\n`
+    for (const i of remaining) {
+        text += `Press ${i+1} to eliminate ${characterTitles[i]}\n`;
     }
-    showTextbox(scene, 'VOTE TO ELIMINATE ONE COUNCIL MEMBER', text);
+    showTextbox(scene, 'VOTE TO ELIMINATE', text);
+    scene.state.phase = 'voting';
 }
