@@ -111,12 +111,14 @@ const defaultPolicy = {
 let selectedPolicy = null;
 
 const game = new Phaser.Game(config);
+const evil = Math.floor(Math.random() * 4);
 let textboxSprite = null;
 let textboxTitle = null;
 let textboxDescription = null;
 let chancellorSprite = null;
 const scrolls = [null, null, null];
 const sounds = {};
+const eliminated = [];
 
 const characters = [
     'dog',
@@ -139,6 +141,10 @@ const lines = {
     clydeChancellor: "IT'S CHANCELLIN TIME !!!",
     casaChancellor: "IT'S CHANCELLIN TIME !!!",
     ajChancellor: "IT'S CHANCELLIN TIME !!!",
+    dogDiscardPolicy: "this policy is trash lil bro",
+    clydeDiscardPolicy: "this policy is trash lil bro",
+    casaDiscardPolicy: "this policy is trash lil bro",
+    ajDiscardPolicy: "this policy is trash lil bro",
 }
 const chancellorPositions = [
     [260, config.height / 6],
@@ -155,6 +161,7 @@ function preload() {
         currentPolicies: [],
         currentChancellor: null,
     }
+    console.log(`EVIL CHARACTER IS: ${characterTitles[evil]}`);
     console.log('SELECTION PHASE');
 
     this.load.spritesheet('backgroundSprite', 'assets/sprites/background.png', {
@@ -295,7 +302,7 @@ function create() {
 
 function update() {
     if (this.state.playing) {
-        if (this.state.phase === 'selection' && !scrolls[0] && !scroll[1] && !scroll[2]) {
+        if (this.state.phase === 'selection' && scrolls.length === 3 && !scrolls[0] && !scroll[1] && !scroll[2]) {
             generatePolicies(this);
         }
     }
@@ -417,10 +424,12 @@ function handleKeyPress(scene, key) {
 function removePolicy(scene, selectedPolicy) {
     console.log(`rejecting policy ${selectedPolicy-1}`);
     scrolls[selectedPolicy-1].destroy();
+    scrolls.splice(selectedPolicy - 1, 1);
     scene.state.currentPolicies.splice(selectedPolicy - 1, 1);
     setTimeout(() => {
         scene.state.phase = 'chancellor';
         console.log('CHANCELLOR PHASE');
+        chancellorChoose(scene);
     }, 1000);
 }
 
@@ -429,7 +438,7 @@ function updateChancellor(scene, newChancellor) {
         console.error('invalid new chancellor');
         return;
     }
-    scene.state.chancellor = newChancellor;
+    scene.state.currentChancellor = newChancellor;
     if (chancellorSprite) {
         const [newX, newY] = chancellorPositions[newChancellor];
         chancellorSprite.setPosition(newX, newY);
@@ -444,5 +453,73 @@ function updateChancellor(scene, newChancellor) {
     chancellorAnnouncement.play();
     chancellorAnnouncement.on('complete', () => {
         hideTextbox(scene);
-    })
+    });
+}
+
+function chancellorChoose(scene) {
+    const chancellor = scene.state.currentChancellor;
+    const discardString = `${characters[chancellor]}DiscardPolicy`;
+    const discardAnnouncement = sounds[discardString];
+    if (!discardAnnouncement || !lines[discardString]) {
+        console.error('something terrible has happened pt. 2');
+        return;
+    }
+    const currentPolicies = scene.state.currentPolicies;
+    if (currentPolicies.length !== 2) {
+        console.error('something has perchance gone VERY WRONG');
+        return;
+    }
+
+    // positive deltas are always better
+    const sum1 = currentPolicies[0].revolt_delta + currentPolicies[0].money_delta;
+    const sum2 = currentPolicies[1].revolt_delta + currentPolicies[1].money_delta;
+    const betterPolicy = sum1 > sum2 ? 0 : 1;
+    const worsePolicy = betterPolicy === 0 ? 1 : 0;
+    // if evil, discard the better policy, otherwise discard the worse policy
+    const discarded = chancellor === evil ? betterPolicy : worsePolicy;
+    showTextbox(scene, characterTitles[chancellor] + ' (Chancellor)', lines[discardString] + `\n(Discards the ${discarded === 0 ? 'left' : 'right'} policy)`);
+    console.log('SCROLLS 1', scrolls);
+    discardAnnouncement.play();
+    discardAnnouncement.on('complete', () => {
+        hideTextbox(scene);
+        scrolls[discarded].destroy();
+        currentPolicies.splice(discarded, 1);
+        const enacted = currentPolicies[0];
+        const revolt = -enacted.revolt_delta;
+        const money = enacted.money_delta;
+        console.log('SCROLLS 2', scrolls);
+        showTextbox(scene, 'POLICY ENACTED', `${enacted.text}\n${revolt >= 0 ? '+' : ''}${revolt} REVOLT\n${money >= 0 ? '+' : ''}${money} MONEY`);
+        setTimeout(() => {
+            hideTextbox(scene);
+            currentPolicies.length = 0;
+            for (const scroll of scrolls) {
+                if (scroll) scroll.destroy();
+            }
+            scrolls.length = 0;
+            scrolls.push(null);
+            scrolls.push(null);
+            scrolls.push(null);
+            if (scene.state.currentChancellor === 3) {
+                scene.state.phase = 'voting';
+                // startVote(scene);
+            } else {
+                scene.state.phase = 'selection';
+                updateChancellor(scene, scene.state.currentChancellor + 1);
+            }
+        }, 3000);
+    });
+}
+
+function startVote(scene) {
+    const remaining = [];
+    for (let i = 0; i < 4; i++) {
+        if (!eliminated.includes(i)) {
+            remaining.push(i);
+        }
+    }
+    let text = '';
+    for (const ith of remaining) {
+        text += `${characters[ith]}: ${votes[ith]}\n`
+    }
+    showTextbox(scene, 'VOTE TO ELIMINATE ONE COUNCIL MEMBER', text);
 }
