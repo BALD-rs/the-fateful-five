@@ -5,6 +5,11 @@ const policies = [
         "money_delta": 5
     },
     {
+        "text": "Repave literally every road",
+        "revolt_delta": 60,
+        "money_delta": -50
+    },
+    {
         "text": "2000% tax on the serfs",
         "revolt_delta": -50,
         "money_delta": 100
@@ -25,7 +30,17 @@ const policies = [
         "money_delta": 0
     },
     {
-        "text": "left handers sent to gulag",
+        "text": "Free Wi-Fi but only in cornfields",
+        "revolt_delta": 15,
+        "money_delta": -10
+    },
+    {
+        "text": "Introduce a 'National Nap Time' every afternoon",
+        "revolt_delta": 25,
+        "money_delta": -15
+    },
+    {
+        "text": "Left handers sent to gulag",
         "revolt_delta": -10,
         "money_delta": -5
     },
@@ -35,12 +50,27 @@ const policies = [
         "money_delta": -5
     },
     {
-        "text": "Institutionalized discrimination of the color green",
+        "text": "Declare socks illegal",
+        "revolt_delta": -30,
+        "money_delta": 5
+    },
+    {
+        "text": "Replace police sirens with banjo music",
+        "revolt_delta": 5,
+        "money_delta": -2
+    },
+    {
+        "text": "State-sanctioned Nicolas Cage prayer hour",
+        "revolt_delta": -20,
+        "money_delta": -5
+    },
+    {
+        "text": "Institutionalized ban of the color green",
         "revolt_delta": -50,
         "money_delta": -30
     },
     {
-        "text": "underground lizard people banned",
+        "text": "Underground lizard people barred from saunas",
         "revolt_delta": 10,
         "money_delta": -5
     },
@@ -49,18 +79,13 @@ const policies = [
         "revolt_delta": -50,
         "money_delta": 40
     },
-    // {
-        // "text": "Legalized medical trainsphobia (hatred of trains)",
-        // "revolt_delta": 50,
-        // "money_delta": -80
-    // },
     {
         "text": "Unnecessarily large chicken nugget",
         "revolt_delta": 10,
         "money_delta": -10
     },
     {
-        "text": "kids in the mines",
+        "text": "Kids in the mines",
         "revolt_delta": -20,
         "money_delta": 70
     },
@@ -70,19 +95,24 @@ const policies = [
         "money_delta": 10
     },
     {
-        "text": "money burn pits",
+        "text": "Construct money burn pits",
         "revolt_delta": -5,
         "money_delta": -40
     },
     {
-        "text": "fish cloning experiments",
+        "text": "Begin fish cloning experiments",
         "revolt_delta": 10,
         "money_delta": 30
     },
     {
-        "text": "build more costcos",
+        "text": "Build more costcos",
         "revolt_delta": 30,
         "money_delta": -20
+    },
+    {
+        "text": "Ban the use of Github, BitBucket is new standard",
+        "revolt_delta": -10,
+        "money_delta": 0
     },
     {
         "text": "divide by 0",
@@ -90,12 +120,12 @@ const policies = [
         "money_delta": -1000
     },
     {
-        "text": "increase minimum wage to 0.25 cents/day",
+        "text": "Increase minimum wage to 0.25 cents/day",
         "revolt_delta": 20,
         "money_delta": -5,
     },
     {
-        "text": "increase the drinking age to 13",
+        "text": "Decrease the drinking age to 13",
         "revolt_delta": -40,
         "money_delta": -10,
     }
