@@ -231,7 +231,7 @@ const characterTitles = [
     'AJ Sampson',
 ]
 const lines = {
-    dogIntro: "Borkedy bork bork bark (What up it's Teddy K. I think modern society is overrated.)",
+    dogIntro: "Borkedy bork bork bark (What up it's Teddy K. I think the industrial revolution is overrated.)",
     clydeIntro: 'In the jungle they called me Clyde. You can too.',
     casaIntro: "I'm Casa. You can relax. I'm not here to make friends.",
     ajIntro: "Name's AJ Sampson. Let's see if I can bring a little of that old charm to the table.",
