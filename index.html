@@ -30,83 +30,83 @@
     <button id="connectButton">Connect to Apparatus</button>
     <!-- <button id="sendButton">Prime Apparatus</button> -->
     <!-- Login/logout buttons and user info -->
-    <div id="user-info" style="display: none;">
+    <!-- <div id="user-info" style="display: none;">
         <p id="user-email"></p>
         <button id="logout">Log Out</button>
     </div>
-    <button id="login" style="display: block;">Log In</button>
+    <button id="login" style="display: block;">Log In</button> -->
 
     <!-- Main game script -->
     <script src="/src/main.js"></script>
 
     <!-- Auth0 Authentication Script -->
     <script type="module">
-        import { createAuth0Client } from '@auth0/auth0-spa-js';
+        // import { createAuth0Client } from '@auth0/auth0-spa-js';
 
-        let auth0Client = null;
+        // let auth0Client = null;
 
-        async function configureAuth0() {
-            // Load Auth0 configuration
-            const response = await fetch("/auth_config.json");
-            const config = await response.json();
+        // async function configureAuth0() {
+        //     // Load Auth0 configuration
+        //     const response = await fetch("/auth_config.json");
+        //     const config = await response.json();
 
-            // Initialize Auth0 client
-            auth0Client = await createAuth0Client({
-                domain: config.domain,
-                clientId: config.clientId,
-                authorizationParams: {
-                    redirect_uri: window.location.origin
-                }
-            });
+        //     // Initialize Auth0 client
+        //     auth0Client = await createAuth0Client({
+        //         domain: config.domain,
+        //         clientId: config.clientId,
+        //         authorizationParams: {
+        //             redirect_uri: window.location.origin
+        //         }
+        //     });
 
-            updateUI();
-        }
+        //     updateUI();
+        // }
 
-        // Update UI based on authentication status
-        async function updateUI() {
-            const isAuthenticated = await auth0Client.isAuthenticated();
+        // // Update UI based on authentication status
+        // async function updateUI() {
+        //     const isAuthenticated = await auth0Client.isAuthenticated();
 
-            if (isAuthenticated) {
-                const user = await auth0Client.getUser();
-                document.getElementById("user-email").textContent = `Logged in as: ${user.email}`;
-                document.getElementById("user-info").style.display = "block";
-                document.getElementById("login").style.display = "none";
-            } else {
-                document.getElementById("user-info").style.display = "none";
-                document.getElementById("login").style.display = "block";
-            }
-        }
+        //     if (isAuthenticated) {
+        //         const user = await auth0Client.getUser();
+        //         document.getElementById("user-email").textContent = `Logged in as: ${user.email}`;
+        //         document.getElementById("user-info").style.display = "block";
+        //         document.getElementById("login").style.display = "none";
+        //     } else {
+        //         document.getElementById("user-info").style.display = "none";
+        //         document.getElementById("login").style.display = "block";
+        //     }
+        // }
 
-        // Handle login
-        document.getElementById("login").addEventListener("click", async () => {
-            await auth0Client.loginWithRedirect({
-                authorizationParams: {
-                    redirect_uri: window.location.origin
-                }
-            });
-        });
+        // // Handle login
+        // document.getElementById("login").addEventListener("click", async () => {
+        //     await auth0Client.loginWithRedirect({
+        //         authorizationParams: {
+        //             redirect_uri: window.location.origin
+        //         }
+        //     });
+        // });
 
-        // Handle logout
-        document.getElementById("logout").addEventListener("click", () => {
-            auth0Client.logout({
-                logoutParams: {
-                    returnTo: window.location.origin
-                }
-            });
-        });
+        // // Handle logout
+        // document.getElementById("logout").addEventListener("click", () => {
+        //     auth0Client.logout({
+        //         logoutParams: {
+        //             returnTo: window.location.origin
+        //         }
+        //     });
+        // });
 
-        // Process Auth0 redirect callback after login
-        window.onload = async () => {
-            await configureAuth0();
+        // // Process Auth0 redirect callback after login
+        // window.onload = async () => {
+        //     await configureAuth0();
 
-            const query = window.location.search;
-            if (query.includes("code=") && query.includes("state=")) {
-                await auth0Client.handleRedirectCallback();
-                window.history.replaceState({}, document.title, "/"); // Remove query parameters
-            }
+        //     const query = window.location.search;
+        //     if (query.includes("code=") && query.includes("state=")) {
+        //         await auth0Client.handleRedirectCallback();
+        //         window.history.replaceState({}, document.title, "/"); // Remove query parameters
+        //     }
 
-            updateUI();
-        };
+        //     updateUI();
+        // };
     </script>
 </body>
 
