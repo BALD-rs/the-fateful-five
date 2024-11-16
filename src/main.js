@@ -193,6 +193,7 @@ const config = {
 
 const SHUFFLE_POLICIES = true;
 const SKIP_INTRO = false;
+const CHAT_DELAY = 750;
 const defaultPolicy = {
     "text": "Kill everyone",
     "revolt_delta": -100,
@@ -200,6 +201,7 @@ const defaultPolicy = {
 };
 let policyIdx = 0;
 let selectedPolicy = null;
+let waitingForKeypress = true;
 
 const game = new Phaser.Game(config);
 let approval = 100;
@@ -454,14 +456,19 @@ function create() {
     sounds.clydePtsd = this.sound.add('clydePtsd');
     sounds.clydeFunny = this.sound.add('clydeFunny');
 
-    this.input.keyboard.on('keydown', (event) => {
+    showTextbox(this, 'Welcome to The Fateful Five!', 'Press any key to continue.');
+
+    this.input.keyboard.on('keydown', async (event) => {
+        waitingForKeypress = false;
         if (!this.state.hasIntroduced) {
             this.state.hasIntroduced = true;
-            if (SKIP_INTRO) {
-                introduceCharacters(this, []);
-            } else {
-                introduceCharacters(this, [['Teddy K.', sounds.dogIntro, lines.dogIntro], ['Clyde', sounds.clydeIntro, lines.clydeIntro], ['Dr. Casa', sounds.casaIntro, lines.casaIntro], ['AJ Sampson', sounds.ajIntro, lines.ajIntro]]);
-            }
+            hideTextbox(this);
+            await sleep(CHAT_DELAY);
+            await instructions(this);
+            const dialogue = SKIP_INTRO ? [] : [['Teddy K.', sounds.dogIntro, lines.dogIntro], ['Clyde', sounds.clydeIntro, lines.clydeIntro], ['Dr. Casa', sounds.casaIntro, lines.casaIntro], ['AJ Sampson', sounds.ajIntro, lines.ajIntro]];
+            setTimeout(() => {
+                introduceCharacters(this, dialogue);
+            }, CHAT_DELAY);
         }
     });
 
@@ -471,6 +478,33 @@ function create() {
 }
 
 function update() {
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function instructions(scene) {
+    const instructionLines = [
+        ['INSTRUCTIONS', 'You are the PRESIDENT of the Fateful Five. Your goal is to pass policies that keep both your Budget and Approval above zero.'],
+        ['INSTRUCTIONS', 'Each round, you will be given 3 policies. As the PRESIDENT, you must view these options (with buttons 1, 2, and 3) and determine which policy to DISCARD (by pressing 4).'],
+        ['INSTRUCTIONS', 'Then, the CHANCELLOR (the character with a gavel over their head) will choose to discard a second policy, passing the third and changing your Approval and Budget.'],
+        ['BUT THERE\'S A TWIST 😳😳', 'One of the four council members in front of you is a SPY. After the chancellorship passes all the way around the table, you will VOTE to ELIMINATE one of them.'],
+        ['VOTE OUT THE SPY TO WIN!', 'If you fail to vote out the spy, or your Budget OR Approval reaches 0, you lose. The council will now introduce themselves.']
+    ]
+    for (const [title, line] of instructionLines) {
+        showTextbox(scene, title, line);
+        await waitForKeypress();
+        hideTextbox(scene);
+        await sleep(CHAT_DELAY);
+    }
+}
+
+async function waitForKeypress() {
+    waitingForKeypress = true;
+    while (waitingForKeypress) {
+        await sleep(100);
+    }
 }
 
 function generatePolicies(scene) {
@@ -609,9 +643,11 @@ function introduceCharacters(scene, dialogue) {
     showTextbox(scene, dialogue[0][0], dialogue[0][2]);
     for (let i = 0; i < dialogue.length - 1; i++) {
         dialogue[i][1].on('complete', () => {
-            dialogue[i + 1][1].play();
             hideTextbox(scene);
-            showTextbox(scene, dialogue[i + 1][0], dialogue[i + 1][2]);
+            setTimeout(() => {
+                dialogue[i + 1][1].play();
+                showTextbox(scene, dialogue[i + 1][0], dialogue[i + 1][2]);
+            }, CHAT_DELAY);
         });
     }
     dialogue[dialogue.length - 1][1].on('complete', () => {
@@ -741,9 +777,7 @@ function handleKeyPress(scene, key) {
                     }
                 }, 1000);
             });
-        } else {
         }
-    } else {
     }
 }
 
